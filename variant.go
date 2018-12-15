@@ -275,6 +275,14 @@ func NewSampleGenotype() *SampleGenotype {
 	return s
 }
 
+// NewSampleGenotypeGTOnly allocates the internals and returns a *SampleGenotype
+// which does *not* have its s.Fields or s.GL properties initialized
+func NewSampleGenotypeGTOnly() *SampleGenotype {
+	s := &SampleGenotype{}
+	s.GT = make([]int, 0, 2)
+	return s
+}
+
 // String gives a string representation of a variant
 func (v *Variant) String() string {
 	var qual string

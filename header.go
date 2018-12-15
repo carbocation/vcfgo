@@ -102,6 +102,31 @@ func (h *Header) parseSample(format []string, s string) (*SampleGenotype, []erro
 	return geno, errs
 }
 
+func (h *Header) parseSampleGTOnly(format []string, s string) (*SampleGenotype, []error) {
+	values := strings.Split(s, ":")
+	if len(format) != len(values) {
+		return NewSampleGenotypeGTOnly(), []error{fmt.Errorf("bad sample string: %s", s)}
+	}
+	//if geno == nil {
+	var geno = NewSampleGenotypeGTOnly()
+	var errs []error
+	//}
+	var e error
+
+Outer:
+	for i, field := range format {
+		switch field {
+		case "GT":
+			e = h.setSampleGT(geno, values[i])
+			if e != nil {
+				errs = append(errs, e)
+			}
+			break Outer
+		}
+	}
+	return geno, errs
+}
+
 func (h *Header) setSampleDP(geno *SampleGenotype, value string) error {
 	var err error
 	geno.DP, err = strconv.Atoi(value)
