@@ -266,16 +266,13 @@ func (h *Header) ParseSamples(v *Variant) error {
 // 	var errors []error
 // 	v.Samples = make([]*SampleGenotype, len(h.SampleNames))
 
-// 	last := 0
 // 	for i, sample := range strings.Split(v.sampleString, string('\t')) {
 // 		var geno *SampleGenotype
 // 		geno, errors = h.parseSampleGTOnly(v.Format, sample)
 
 // 		v.Samples[i] = geno
-// 		last = i
 // 	}
-// 	log.Println("N samples seen:", last+1, "N expected", len(h.SampleNames))
-// 	panic("TEST")
+
 // 	v.sampleString = ""
 // 	if len(errors) > 0 {
 // 		return errors[0]
