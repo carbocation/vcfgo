@@ -174,6 +174,42 @@ func (h *Header) setSampleGL(geno *SampleGenotype, value string, isPL bool) erro
 
 func (h *Header) setSampleGT(geno *SampleGenotype, value string) error {
 	geno.Phased = strings.Contains(value, "|")
+
+	// Fast track for the common path
+	if len(value) == 3 {
+		switch value[0] {
+		case '.':
+			geno.GT = append(geno.GT, -1)
+		case '1':
+			geno.GT = append(geno.GT, 1)
+		case '0':
+			geno.GT = append(geno.GT, 0)
+		default:
+			v, err := strconv.Atoi(string(value[0]))
+			if err != nil {
+				return err
+			}
+			geno.GT = append(geno.GT, v)
+		}
+
+		switch value[2] {
+		case '.':
+			geno.GT = append(geno.GT, -1)
+		case '1':
+			geno.GT = append(geno.GT, 1)
+		case '0':
+			geno.GT = append(geno.GT, 0)
+		default:
+			v, err := strconv.Atoi(string(value[2]))
+			if err != nil {
+				return err
+			}
+			geno.GT = append(geno.GT, v)
+		}
+
+		return nil
+	}
+
 	splitString := "/"
 	if geno.Phased {
 		splitString = "|"
