@@ -6,6 +6,7 @@ import (
 	"log"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/brentp/irelate/interfaces"
 )
@@ -266,6 +267,18 @@ func (sg *SampleGenotype) String(fields []string) string {
 	return strings.Join(s, ":")
 }
 
+// Implement a buffered pool
+var sampleGenotypeGTOnlyPool = sync.Pool{
+	New: func() interface{} {
+		return NewSampleGenotypeGTOnlyUnpooled()
+	},
+}
+
+func (sg *SampleGenotype) PoolRelease() {
+	// TODO: Zero things out?
+	sampleGenotypeGTOnlyPool.Put(sg)
+}
+
 // NewSampleGenotype allocates the internals and returns a *SampleGenotype
 func NewSampleGenotype() *SampleGenotype {
 	s := &SampleGenotype{}
@@ -275,12 +288,19 @@ func NewSampleGenotype() *SampleGenotype {
 	return s
 }
 
-// NewSampleGenotypeGTOnly allocates the internals and returns a *SampleGenotype
-// which does *not* have its s.Fields or s.GL properties initialized
-func NewSampleGenotypeGTOnly() *SampleGenotype {
+// NewSampleGenotypeGTOnlyUnpooled allocates the internals and returns a
+// *SampleGenotype which does *not* have its s.Fields or s.GL properties
+// initialized
+func NewSampleGenotypeGTOnlyUnpooled() *SampleGenotype {
 	s := &SampleGenotype{}
 	s.GT = make([]int, 0, 2)
 	return s
+}
+
+// NewSampleGenotypeGTOnly allocates the internals and returns a *SampleGenotype
+// which does *not* have its s.Fields or s.GL properties initialized
+func NewSampleGenotypeGTOnly() *SampleGenotype {
+	return sampleGenotypeGTOnlyPool.Get().(*SampleGenotype)
 }
 
 // String gives a string representation of a variant
