@@ -103,8 +103,8 @@ func (h *Header) parseSample(format []string, s string) (*SampleGenotype, []erro
 }
 
 func (h *Header) parseSampleGTOnly(format []string, s string) (*SampleGenotype, []error) {
-	values := strings.Split(s, ":")
-	if len(format) != len(values) {
+	nCols := strings.Count(s, ":") + 1
+	if len(format) != nCols {
 		return NewSampleGenotypeGTOnly(), []error{fmt.Errorf("bad sample string: %s", s)}
 	}
 	//if geno == nil {
@@ -112,6 +112,16 @@ func (h *Header) parseSampleGTOnly(format []string, s string) (*SampleGenotype, 
 	var errs []error
 	//}
 	var e error
+
+	// Fast path: You only have genotypes
+	if nCols == 1 {
+		e = h.setSampleGT(geno, s)
+		return geno, errs
+	}
+
+	// Otherwise, you want to extract GTs but you have other columns. Need to
+	// split.
+	values := strings.Split(s, ":")
 
 Outer:
 	for i, field := range format {
