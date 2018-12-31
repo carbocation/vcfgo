@@ -267,6 +267,10 @@ func (h *Header) ParseSamplesGTOnly(v *Variant) error {
 	v.Samples = make([]*SampleGenotype, len(h.SampleNames))
 
 	for i, sample := range strings.Split(v.sampleString, string('\t')) {
+		if len(sample) < 3 {
+			continue
+		}
+
 		geno, errs := h.parseSampleGTOnly(v.Format[:1], sample[0:3])
 		if errs != nil {
 			errors = append(errors, errs...)
