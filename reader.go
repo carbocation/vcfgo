@@ -260,7 +260,7 @@ func (h *Header) ParseSamples(v *Variant) error {
 
 // Force parsing of the GT field only.
 func (h *Header) ParseSamplesGTOnly(v *Variant) error {
-	if v.Format == nil || v.sampleString == "" || v.Samples != nil {
+	if v.Format == nil || len(v.Format) < 1 || v.sampleString == "" || v.Samples != nil {
 		return nil
 	}
 	var errors []error
