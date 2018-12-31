@@ -259,28 +259,6 @@ func (h *Header) ParseSamples(v *Variant) error {
 }
 
 // Force parsing of the GT field only.
-// func (h *Header) ParseSamplesGTOnly(v *Variant) error {
-// 	if v.Format == nil || v.sampleString == "" || v.Samples != nil {
-// 		return nil
-// 	}
-// 	var errors []error
-// 	v.Samples = make([]*SampleGenotype, len(h.SampleNames))
-
-// 	for i, sample := range strings.Split(v.sampleString, string('\t')) {
-// 		var geno *SampleGenotype
-// 		geno, errors = h.parseSampleGTOnly(v.Format, sample)
-
-// 		v.Samples[i] = geno
-// 	}
-
-// 	v.sampleString = ""
-// 	if len(errors) > 0 {
-// 		return errors[0]
-// 	}
-// 	return nil
-// }
-
-// Force parsing of the GT field only.
 func (h *Header) ParseSamplesGTOnly(v *Variant) error {
 	if v.Format == nil || v.sampleString == "" || v.Samples != nil {
 		return nil
@@ -288,44 +266,14 @@ func (h *Header) ParseSamplesGTOnly(v *Variant) error {
 	var errors []error
 	v.Samples = make([]*SampleGenotype, len(h.SampleNames))
 
-	// for bytePos, b := range []byte(v.sampleString) {
-	// 	if b == byte(0) {
-	// 		log.Println(v.Chrom(), v.Pos, "contains a null byte at position", bytePos)
-	// 		panic("Test 0")
-	// 	}
-	// }
-
-	position := 0
-	which := 0
-	for pos, char := range v.sampleString {
-		if char == '\t' {
-			geno, errs := h.parseSampleGTOnly(v.Format, v.sampleString[pos-3:pos])
-			if len(errs) > 0 {
-				errors = append(errors, errs...)
-
-				// log.Println(v.Chrom(), v.Pos, "0-based sample", which)
-				// log.Println("Neighborhood:")
-				// for _, char := range v.sampleString[pos-15 : pos+15] {
-				// 	fmt.Printf("%d:[%d=\"%s\"] ", pos-15, char, string(char))
-				// }
-				// panic("Test")
-			}
-			v.Samples[which] = geno
-
-			which++
+	for i, sample := range strings.Split(v.sampleString, string('\t')) {
+		geno, errs := h.parseSampleGTOnly(v.Format[:1], sample[0:3])
+		if errs != nil {
+			errors = append(errors, errs...)
 		}
-		position = pos
-	}
 
-	// Final one
-	position++
-	geno, errs := h.parseSampleGTOnly(v.Format, v.sampleString[position-3:])
-	if len(errs) > 0 {
-		errors = append(errors, errs...)
-		// log.Println(errors)
-		// panic("Test2")
+		v.Samples[i] = geno
 	}
-	v.Samples[which] = geno
 
 	v.sampleString = ""
 	if len(errors) > 0 {
@@ -333,6 +281,62 @@ func (h *Header) ParseSamplesGTOnly(v *Variant) error {
 	}
 	return nil
 }
+
+// Force parsing of the GT field only.
+// Works only if you truly just have GT fields for each sample. If some samples
+// might have additional fields, don't use this method.
+// func (h *Header) ParseSamplesGTOnly(v *Variant) error {
+// 	if v.Format == nil || v.sampleString == "" || v.Samples != nil {
+// 		return nil
+// 	}
+// 	var errors []error
+// 	v.Samples = make([]*SampleGenotype, len(h.SampleNames))
+
+// 	// for bytePos, b := range []byte(v.sampleString) {
+// 	// 	if b == byte(0) {
+// 	// 		log.Println(v.Chrom(), v.Pos, "contains a null byte at position", bytePos)
+// 	// 		panic("Test 0")
+// 	// 	}
+// 	// }
+
+// 	position := 0
+// 	which := 0
+// 	for pos, char := range v.sampleString {
+// 		if char == '\t' {
+// 			geno, errs := h.parseSampleGTOnly(v.Format, v.sampleString[pos-3:pos])
+// 			if len(errs) > 0 {
+// 				errors = append(errors, errs...)
+
+// 				// log.Println(v.Chrom(), v.Pos, "0-based sample", which)
+// 				// log.Println("Neighborhood:")
+// 				// for _, char := range v.sampleString[pos-15 : pos+15] {
+// 				// 	fmt.Printf("%d:[%d=\"%s\"] ", pos-15, char, string(char))
+// 				// }
+// 				// panic("Test")
+// 			}
+// 			v.Samples[which] = geno
+
+// 			which++
+// 		}
+// 		position = pos
+// 	}
+
+// 	// Final one
+// 	position++
+// 	geno, errs := h.parseSampleGTOnly(v.Format, v.sampleString[position-3:])
+// 	if len(errs) > 0 {
+// 		errors = append(errors, errs...)
+// 		// log.Println(errors)
+// 		// panic("Test2")
+// 	}
+// 	v.Samples[which] = geno
+
+// 	v.sampleString = ""
+// 	if len(errors) > 0 {
+// 		return errors[0]
+// 	}
+// 	return nil
+// }
 
 // Add a INFO field to the header.
 func (vr *Reader) AddInfoToHeader(id string, num string, stype string, desc string) {
