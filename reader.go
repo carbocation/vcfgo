@@ -137,8 +137,8 @@ func NewReader(r io.Reader, lazySamples bool) (*Reader, error) {
 			break
 
 		} else {
-			e := fmt.Errorf("unexpected header line: %s", line)
-			return nil, e
+			verr.Add(fmt.Errorf("unexpected header line: %s", line), LineNumber)
+			break
 		}
 	}
 	reader := &Reader{buffered, h, verr, LineNumber, lazySamples, r}
